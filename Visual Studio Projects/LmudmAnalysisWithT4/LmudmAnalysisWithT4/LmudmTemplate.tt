@@ -1,0 +1,38 @@
+﻿<#+
+// <copyright file="Template1.tt" company="">
+//  Copyright © . All Rights Reserved.
+// </copyright>
+
+public class LmudmTemplate : Template
+{
+	public string CubeName;
+    public string[] Measures;
+
+	public override string TransformText()
+	{
+		
+		WriteLine("WITH");
+		foreach(var measure in Measures) { 
+#>
+	MEMBER [measures].[<#= measure #>_Aggregated]
+		as Aggregate([Date].[Date].&[2014-10-01T00:00:00]:[Date].[Date].&[2015-02-19T00:00:00],[Measures].[<#= measure #>])
+<#+
+		}
+
+		var lastMeasure = Measures[Measures.Length-1];
+		WriteLine("SELECT {");
+	
+		foreach(var measure in Measures) {#>
+	[Measures].[<#= measure #>_Aggregated] <#+			if(measure != lastMeasure)
+				WriteLine(",");
+		}
+#>
+
+}  ON Columns
+FROM 	[LiveMetricsCube];
+<#+
+
+        return this.GenerationEnvironment.ToString();
+	}
+}
+#>
